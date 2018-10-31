@@ -88,53 +88,47 @@ def depthFirstSearch(problem):
     """
     "*** YOUR CODE HERE ***"
     "***** auta einai ta palia ***"
-
-    print "Start:", problem.getStartState()
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
-    
-    explored_nodes = set()
     node_list = set()# xrhsimopoieitai gia thn euresh tou monopatiou sth sunarthsh solution
-    
-    fringeList = list()
     path = list()
-    fringe = util.Stack()
-    inFringeFlg = False
+    fringe = util.Stack() #DFS uses stack for fringe 
+    fringeFlg = False
+    explFlg = False
     
     if problem.isGoalState(problem.getStartState()):
         return[]
-    fringe.push([problem.getStartState(),None,0])
-    node_list.add((problem.getStartState(),problem.getStartState(),None))
+    fringe.push([problem.getStartState(),None,0]) #[node, action, cost]
+    node_list.add((problem.getStartState(),problem.getStartState(),None)) #[node,parent,action]
     
     while True:    
         if fringe.isEmpty(): return []
         testNode = fringe.pop()
-        explored_nodes.add(testNode[0])
         successors = problem.getSuccessors(testNode[0])
         
         for i in successors:
-            for f in fringe.list:
+            fringeFlg = False
+            explFlg = False
+            for f in fringe.list: #check if node is already in fringe
                 if i[0] == f[0]:
-                    inFringeFlg = True
+                    fringeFlg = True
                     break
-            if i[0] not in explored_nodes and inFringeFlg == False:
-                if problem.isGoalState(i[0]):
+                
+            for e in node_list: #check if node is already in explored nodes
+                if i[0] == e[0]:
+                    explFlg = True
+                    break
+            if explFlg == False and fringeFlg == False:
+                if problem.isGoalState(i[0]): #if a goal was found , call solution to construct the path
                     state = i[0]
                     parent = testNode[0]
                     action = i[1]
                     node_list.add((state,parent,action))
-                    path = solution(node_list, i[0], problem.getStartState())
+                    path = solution(node_list, i[0], problem.getStartState())  #construct the path
                     return path
-                fringe.push([i[0],i[1],i[2]])
-                
+                fringe.push([i[0],i[1],i[2]]) 
                 state = i[0]
                 parent = testNode[0]
                 action = i[1]
-                node_list.add((state,parent,action))
-            if inFringeFlg == True:
-                inFringeFlg = False
-    "*****************************"
-    
+                node_list.add((state,parent,action))    
     util.raiseNotDefined()
 
 def solution(expl_nodes, node, startNode): #h sunarthsh auth einai gia thn euresh tou monopatiou mexri to stoxo
@@ -155,33 +149,33 @@ def breadthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
     explored_nodes = set()
     node_list = list() # xrhsimopoieitai gia thn euresh tou monopatiou sth sunarthsh solution
-    
-    fringeList = list()
     path = list()
-    fringe = util.Queue()
-    #if problem.isGoalState(problem.getStartState()):
-     #   return[]
-    fringe.push([problem.getStartState(),None,0])
-    fringeList.append(problem.getStartState())
-    node_list.append((problem.getStartState(),problem.getStartState(),None))
-    while True:
-        
+    fringe = util.Queue() #BFS uses queue for fringe
+    
+    if problem.isGoalState(problem.getStartState()):
+        return[]
+    fringe.push([problem.getStartState(),None,0]) #[node, action, cost ]
+    node_list.append((problem.getStartState(),problem.getStartState(),None)) #[node,parent,action]
+    while True:   
         if fringe.isEmpty(): return []
         testNode = fringe.pop()
-        #if len(fringeList) > 0:
-        del fringeList[ len(fringeList)-1]
-        if problem.isGoalState(testNode[0]):
-            path = solution(node_list,testNode[0],problem.getStartState())
-            return path
-        explored_nodes.add(testNode[0])
-
         successors = problem.getSuccessors(testNode[0])
         for i in successors:
-            tmp = []
-            for f in fringe.list:
-                tmp.append( f[0] )
-            if i[0] not in explored_nodes and i[0] not in tmp:
-                if problem.isGoalState(i[0]):
+            fringeFlg = False
+            explFlg = False
+            
+            for f in fringe.list: #check if node is already in fringe
+                if i[0] == f[0]:
+                    fringeFlg = True
+                    break
+
+            for e in node_list: #check if node is already in explored nodes
+                if i[0] == e[0]:
+                    explFlg = True
+                    break
+                
+            if fringeFlg == False and explFlg == False:
+                if problem.isGoalState(i[0]): #if a goal was found , call solution to construct the path
                     state = i[0]
                     parent = testNode[0]
                     action = i[1]
@@ -189,7 +183,6 @@ def breadthFirstSearch(problem):
                     path = solution(node_list, i[0], problem.getStartState())
                     return path
                 fringe.push([i[0],i[1],i[2]])
-                fringeList.append(i[0])
                 state = i[0]
                 parent = testNode[0]
                 action = i[1]
@@ -199,49 +192,56 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    explored_nodes = set()
     node_list = set() # xrhsimopoieitai gia thn euresh tou monopatiou sth sunarthsh solution
     path = list()
     fringe = util.PriorityQueue()
-    inFringeFlg = False
-    
-    if problem.isGoalState(problem.getStartState()):
-        return[]
-    fringe.push([problem.getStartState(),None,0],0)
+    fringe.push([problem.getStartState(),None,0, problem.getStartState()],0) #[node,action,cost,parent]
+    explFlg = False
+    fringeFlg = False
   
     node_list.add((problem.getStartState(),problem.getStartState(),None))
     
     while True:    
         if fringe.isEmpty(): return []
         testNode = fringe.pop()
-        explored_nodes.add(testNode[0])
-
+        if problem.isGoalState( testNode[0] ): #if a goal was found , call solution to construct the path
+            state = testNode[0] #node
+            parent = testNode[3] #parent node
+            action = testNode[1] #action from parent to child
+            node_list.add( (state,parent,action) )
+            path = solution(node_list, state, problem.getStartState())
+            return path
+                
+        node_list.add((testNode[0],testNode[3],testNode[1])) #[node,parent,action]
+        
         successors = problem.getSuccessors(testNode[0])
         for i in successors:
-            for f in fringe.heap:
-                if i[0] == f[0]:
-                    inFringeFlg = True
-                    break;
+            
+            for f in fringe.heap: #check if node is already in fringe
+                if f[0] == i[0]:
+                    fringeFlg = True
+                    break
+            for e in node_list: #check if node is already in explored nodes
+                if e[0] == i[0]:
+                    explFlg = True
+                    break
                 
-            if i[0] not in explored_nodes and inFringeFlg == False:
-                if problem.isGoalState(i[0]):
-                    state = i[0]
-                    parent = testNode[0]
-                    action = i[1]
-                    node_list.add((state,parent,action))
-                    path = solution(node_list, i[0], problem.getStartState())
-                    return path
-                fringe.push([i[0],i[1],i[2]],testNode[2]+i[2])
-                #fringeList.append(i)
+            if explFlg == False and fringeFlg == False:
                 state = i[0]
                 parent = testNode[0]
                 action = i[1]
-                node_list.add((state,parent,action))
-            #elif i in fringe.heap:
-            elif inFringeFlg == True:
-             #   fringe.update(i,testNode[2]+k)
-                fringe.update(i, testNode[2])
+                cost = i[2]
+                fringe.push([state,action,cost,parent],testNode[2]+cost) #eisagwgh sto sunoro
+            elif fringeFlg == True:
+                state = i[0]
+                parent = testNode[0]
+                action = i[1]
+                cost = i[2]
+                item = [state, action, cost, parent] 
+                fringe.update(i,testNode[2]+cost) #update sto sunoro(vrethike mikrotero priority)
                 
+            fringeFlg = False
+            explFlg = False
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
@@ -254,49 +254,50 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    explored_nodes = set()
     node_list = set() # xrhsimopoieitai gia thn euresh tou monopatiou sth sunarthsh solution
     path = list()
     fringe = util.PriorityQueue()
-    inFringeFlg = False
+    
     h = heuristic(problem.getStartState(), problem)
     
     if problem.isGoalState(problem.getStartState()):
         return[]
-    fringe.push([problem.getStartState(),None,0],0)
+    fringe.push([problem.getStartState(),None,0],0) #( [node, action, cost], f )
   
-    node_list.add((problem.getStartState(),problem.getStartState(),None))
+    node_list.add((problem.getStartState(),problem.getStartState(),None)) #[node, action, cost ]
     
     while True:    
-        if fringe.isEmpty(): return []
+        if fringe.isEmpty():
+            return []
         testNode = fringe.pop()
-        explored_nodes.add(testNode[0])
-
         successors = problem.getSuccessors(testNode[0])
         for i in successors:
-            for f in fringe.heap:
+            inFringeFlg = False
+            explFlg = False
+            
+            for f in fringe.heap: #check if node is already in fringe
                 if i[0] == f[0]:
                     inFringeFlg = True
-                    break;
-                
-            if i[0] not in explored_nodes and inFringeFlg == False:
-                if problem.isGoalState(i[0]):
+                    break
+            for e in node_list: #check if node is already in explored nodes
+                if i[0] == e[0]:
+                    explFlg = True
+                    break
+            if explFlg == False and inFringeFlg == False:
+                if problem.isGoalState(i[0]): #if a goal was found , call solution to construct the path
                     state = i[0]
                     parent = testNode[0]
                     action = i[1]
                     node_list.add((state,parent,action))
-                    path = solution(node_list, i[0], problem.getStartState())
+                    path = solution(node_list, i[0], problem.getStartState()) #construct the path
                     return path
-                #fringe.push([i[0],i[1],i[2]],testNode[2]+i[2])
                 h = heuristic(i[0], problem)
                 fringe.push( [i[0], i[1],i[2]], testNode[2]+i[2]+h )
                 state = i[0]
                 parent = testNode[0]
                 action = i[1]
                 node_list.add((state,parent,action))
-            #elif i in fringe.heap:
             elif inFringeFlg == True:
-             #   fringe.update(i,testNode[2]+k)
                 fringe.update(i, testNode[2])
                 
     util.raiseNotDefined()
